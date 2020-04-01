@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -8,11 +9,24 @@ namespace Yandex.Geocoder.Tests
 {
     public class GeocoderTests
     {
+        private string apiKey;
+
+        public GeocoderTests()
+        {
+            var key = Environment.GetEnvironmentVariable("YANDEX.GEOCODER_API_KEY");
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new Exception("YANDEX.GEOCODER_API_KEY environment variable is not set");
+            }
+
+            apiKey = key;
+        }
+
         [Fact]
         public async Task GeocodeCity()
         {
             var request = new GeocoderRequest { Request = "Ярославль серова 13" };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var response = await client.Geocode(request);
 
@@ -39,7 +53,7 @@ namespace Yandex.Geocoder.Tests
         public async Task GeocodeSettlementWithoutStreet()
         {
             var request = new GeocoderRequest { Request = "Ярославская область Октябрьский 12" };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var response = await client.Geocode(request);
 
@@ -66,7 +80,7 @@ namespace Yandex.Geocoder.Tests
         public async Task ReverseGeocode()
         {
             var request = new ReverseGeocoderRequest { Latitude = 58.046733, Longitude = 38.841715 };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var response = await client.ReverseGeocode(request);
 
@@ -91,7 +105,7 @@ namespace Yandex.Geocoder.Tests
         public async Task RestrictionOfObjectsReturnedByReverseGeocoding()
         {
             var request = new ReverseGeocoderRequest { Latitude = 58.046733, Longitude = 38.841715, Kind = AddressComponentKind.Locality };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var response = await client.ReverseGeocode(request);
 
@@ -110,7 +124,7 @@ namespace Yandex.Geocoder.Tests
         public async Task ParseCoordinates()
         {
             var request = new GeocoderRequest { Request = "Ярославская область Октябрьский 12" };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var response = await client.Geocode(request);
 
@@ -132,7 +146,7 @@ namespace Yandex.Geocoder.Tests
                 SearchArea = new Area { Latitude = 59.300000, Longitude = 39.500000, LatitudeSpan = 0.500000, LongitudeSpan = 0.500000 },
                 IsRestrictArea = true
             };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
             var firstResponse = await client.Geocode(firstRequest);
             var firstResponseGeoObject = firstResponse.GeoObjectCollection.FeatureMember.FirstOrDefault();
             var firstResponseAddressComponents = firstResponseGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
@@ -167,7 +181,7 @@ namespace Yandex.Geocoder.Tests
                 BordersArea = new BoxArea { LowerLatitude = 59.440733, LowerLongitude = 39.641063, UpperLatitude = 59.457845, UpperLongitude = 39.666459 },
                 IsRestrictArea = true
             };
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
             var firstResponse = await client.Geocode(firstRequest);
             var firstResponseGeoObject = firstResponse.GeoObjectCollection.FeatureMember.FirstOrDefault();
             var firstResponseAddressComponents = firstResponseGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
@@ -188,22 +202,22 @@ namespace Yandex.Geocoder.Tests
                 IsRestrictArea = true
             };
 
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
             var firstResponse = await client.Geocode(firstRequest);
             var firstResponseGeoObject = firstResponse.GeoObjectCollection.FeatureMember.FirstOrDefault();
-          
+
             Assert.Null(firstResponseGeoObject);
         }
 
         [Fact]
         public async Task LimitNumberOfReturnedGeoObjects()
         {
-            var client = new GeocoderClient();
+            var client = new GeocoderClient(apiKey);
 
             var unlimitedResponse = await client.Geocode(new GeocoderRequest { Request = "Серова" });
             var unlimitedGeoObjectCount = unlimitedResponse.GeoObjectCollection.FeatureMember.Count;
 
-            var limitedResponse = await client.Geocode(new GeocoderRequest { Request = "Серова", MaxCount = 1});
+            var limitedResponse = await client.Geocode(new GeocoderRequest { Request = "Серова", MaxCount = 1 });
             var limitedGeoObjectCount = limitedResponse.GeoObjectCollection.FeatureMember.Count;
 
             Assert.True(unlimitedGeoObjectCount > limitedGeoObjectCount);

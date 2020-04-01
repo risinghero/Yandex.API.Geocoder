@@ -11,11 +11,6 @@ namespace Yandex.Geocoder
     {
         public const string DefaultGeocoderBaseUrl = "https://geocode-maps.yandex.ru/1.x/";
 
-        public GeocoderClient()
-            : this(null)
-        {
-        }
-
         public GeocoderClient(string key)
         {
             Key = key;
@@ -70,8 +65,8 @@ namespace Yandex.Geocoder
                 restRequest.AddQueryParameter("kind", reverseGeocoderRequest.Kind.ToString().ToLower());
             }
 
-            var coordiante = new Coordinate(reverseGeocoderRequest.Latitude, reverseGeocoderRequest.Longitude);
-            restRequest.AddQueryParameter("geocode", coordiante.ToString());
+            var coordinate = new Coordinate(reverseGeocoderRequest.Latitude, reverseGeocoderRequest.Longitude);
+            restRequest.AddQueryParameter("geocode", coordinate.ToString());
 
             return ExecuteQuery(restRequest, reverseGeocoderRequest);
         }
@@ -79,7 +74,7 @@ namespace Yandex.Geocoder
         protected async Task<GeocoderResponseType> ExecuteQuery(RestRequest restRequest, BaseGeocoderRequest baseGeocoderRequest)
         {
             restRequest.AddQueryParameter("format", "json");
-            restRequest.AddQueryParameter("lang", baseGeocoderRequest.Language);
+            restRequest.AddQueryParameter("lang", baseGeocoderRequest.Language.ToString());
 
             if (!string.IsNullOrEmpty(Key))
             {

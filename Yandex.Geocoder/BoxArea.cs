@@ -8,7 +8,7 @@
         public double UpperLatitude;
         public double UpperLongitude;
 
-        public BoxArea (double lowerLatitude, double lowerLongitude, double upperLatitude, double upperLongitude)
+        public BoxArea(double lowerLatitude, double lowerLongitude, double upperLatitude, double upperLongitude)
         {
             LowerLatitude = lowerLatitude;
             LowerLongitude = lowerLongitude;

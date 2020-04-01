@@ -24,8 +24,6 @@ namespace Yandex.Geocoder
 
         protected void Parse(string source)
         {
-            var result = string.Empty;
-
             var parts = source.Split(' ', ',');
 
             if (parts.Length == 2)

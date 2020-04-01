@@ -1,9 +1,11 @@
-﻿namespace Yandex.Geocoder
+﻿using Yandex.Geocoder.Enums;
+
+namespace Yandex.Geocoder
 {
     public abstract class BaseGeocoderRequest
     {
-        public const string DefaultLanguage = "ru_RU";
-        public const int DefaultMaxCount = 5;
+        public const ResponseLanguage DefaultLanguage = ResponseLanguage.ru_RU;
+        public const byte DefaultMaxCount = 10;
 
         protected BaseGeocoderRequest()
         {
@@ -11,8 +13,8 @@
             MaxCount = DefaultMaxCount;
         }
 
-        public string Language { get; set; }
+        public ResponseLanguage Language { get; set; }
 
-        public int MaxCount { get; set; }
+        public byte MaxCount { get; set; }
     }
 }
