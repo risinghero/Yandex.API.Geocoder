@@ -46,10 +46,10 @@ namespace Yandex.Geocoder
                 }
                 else
                 {
-                    var coordiante = new Coordinate(geocoderRequest.SearchArea.Latitude, geocoderRequest.SearchArea.Longitude);
+                    var coordinate = new Coordinate(geocoderRequest.SearchArea.Latitude, geocoderRequest.SearchArea.Longitude);
                     var span = new Coordinate(geocoderRequest.SearchArea.LatitudeSpan, geocoderRequest.SearchArea.LongitudeSpan);
 
-                    restRequest.AddQueryParameter("ll", coordiante.ToString());
+                    restRequest.AddQueryParameter("ll", coordinate.ToString());
                     restRequest.AddQueryParameter("spn", span.ToString());
                 }
             }
@@ -75,6 +75,11 @@ namespace Yandex.Geocoder
         {
             restRequest.AddQueryParameter("format", "json");
             restRequest.AddQueryParameter("lang", baseGeocoderRequest.Language.ToString());
+
+            if (baseGeocoderRequest.Skip != 0)
+            {
+                restRequest.AddQueryParameter("skip ", baseGeocoderRequest.Skip.ToString());
+            }
 
             if (!string.IsNullOrEmpty(Key))
             {
