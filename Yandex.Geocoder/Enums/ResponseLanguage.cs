@@ -1,5 +1,8 @@
-﻿namespace Yandex.Geocoder.Enums
+﻿using System.Diagnostics;
+
+namespace Yandex.Geocoder.Enums
 {
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public enum ResponseLanguage
     {
         /// <summary>
