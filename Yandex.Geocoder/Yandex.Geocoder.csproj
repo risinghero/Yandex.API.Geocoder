@@ -1,23 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Pavel Fedorov, Marat Fakhrutdinov</Authors>
-    <PackageProjectUrl>https://github.com/SteppenHorde/Yandex.Geocoder</PackageProjectUrl>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <Authors>RisingHeroMan, Pavel Fedorov, Marat Fakhrutdinov</Authors>
+    <PackageProjectUrl>https://github.com/risinghero/Yandex.API.Geocoder</PackageProjectUrl>
     <PackageTags>C# Yandex Geocoder</PackageTags>
-    <Title>Yandex.Geocoder</Title>
-    <Description>Yandex.Geocoder API client for C# / .NET forked by Marat Fakhrutdinov</Description>
-    <PackageId>Yandex.Geocoder.v2</PackageId>
-    <PackageVersion>1.0.2</PackageVersion>
-    <Summary>Yandex.Geocoder API client for C# / .NET</Summary>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
-    <FileVersion>1.0.0.2</FileVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.2</Version>
+    <Title>Yandex.API.Geocoder</Title>
+    <Description>Yandex geocoder API client</Description>
+    <PackageId>Yandex.API.Geocoder</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Summary>Yandex geocoder API client</Summary>
+    <Version>1.0.0</Version>
+    <RootNamespace>Yandex.API.Geocoder</RootNamespace>
+    <AssemblyName>Yandex.API.Geocoder</AssemblyName>
+      <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="106.3.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Address\" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>

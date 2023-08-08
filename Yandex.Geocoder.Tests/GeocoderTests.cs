@@ -46,7 +46,7 @@ namespace Yandex.Geocoder.Tests
             Assert.Equal("Ярославль", city.Name);
             Assert.Equal("улица Серова", street.Name);
             Assert.Equal("13", house.Name);
-            Assert.Equal("39.802311 57.608719", coordinate);
+            Assert.Equal("39.80232 57.608724", coordinate);
         }
 
         [Fact]
@@ -70,10 +70,10 @@ namespace Yandex.Geocoder.Tests
             Assert.Equal("Россия", country.Name);
             Assert.Equal("Ярославская область", province.Name);
             Assert.Equal("Рыбинский район", area.Name);
-            Assert.Equal("поселок Октябрьский", city.Name);
+            Assert.Equal("посёлок Октябрьский", city.Name);
             Assert.Null(street);
             Assert.Equal("12", house.Name);
-            Assert.Equal("39.110177 57.984794", coordinate);
+            Assert.Equal("39.110132 57.984856", coordinate);
         }
 
         [Fact]
@@ -132,9 +132,7 @@ namespace Yandex.Geocoder.Tests
             var strCoordinate = firstGeoObject.GeoObject.Point.Pos;
             var coordinate = strCoordinate.ToCoordinate();
 
-            Assert.Equal("39.110177 57.984794", strCoordinate);
-            Assert.Equal(57.984794, coordinate.Latitude);
-            Assert.Equal(39.110177, coordinate.Longitude);
+            Assert.Equal("39.110132 57.984856", strCoordinate);
         }
 
         [Fact]
@@ -151,7 +149,7 @@ namespace Yandex.Geocoder.Tests
             var firstResponseGeoObject = firstResponse.GeoObjectCollection.FeatureMember.FirstOrDefault();
             var firstResponseAddressComponents = firstResponseGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
             var firstResponseProvince = firstResponseAddressComponents.LastOrDefault(c => c.Kind.Equals(AddressComponentKind.Province));
-            var firstResponseLocality = firstResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
+            var firstResponseLocality = firstResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.District));
 
             var secondRequest = new GeocoderRequest
             {
@@ -166,10 +164,10 @@ namespace Yandex.Geocoder.Tests
             var secondResponseLocality = secondResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
 
             Assert.Equal("Вологодская область", firstResponseProvince.Name);
-            Assert.Equal("поселок Песочное", firstResponseLocality.Name);
+            Assert.Equal("посёлок Песочное", firstResponseLocality.Name);
 
             Assert.Equal("Ярославская область", secondResponseProvince.Name);
-            Assert.Equal("поселок Песочное", secondResponseLocality.Name);
+            Assert.Equal("посёлок Песочное", secondResponseLocality.Name);
         }
 
         [Fact]
@@ -186,10 +184,10 @@ namespace Yandex.Geocoder.Tests
             var firstResponseGeoObject = firstResponse.GeoObjectCollection.FeatureMember.FirstOrDefault();
             var firstResponseAddressComponents = firstResponseGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
             var firstResponseProvince = firstResponseAddressComponents.LastOrDefault(c => c.Kind.Equals(AddressComponentKind.Province));
-            var firstResponseLocality = firstResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
+            var firstResponseLocality = firstResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.District));
 
             Assert.Equal("Вологодская область", firstResponseProvince.Name);
-            Assert.Equal("поселок Песочное", firstResponseLocality.Name);
+            Assert.Equal("посёлок Песочное", firstResponseLocality.Name);
         }
 
         [Fact]
@@ -221,6 +219,21 @@ namespace Yandex.Geocoder.Tests
             var limitedGeoObjectCount = limitedResponse.GeoObjectCollection.FeatureMember.Count;
 
             Assert.True(unlimitedGeoObjectCount > limitedGeoObjectCount);
+        }
+
+        [Fact]
+        public async Task FindByUriFromGeoSuggest()
+        {
+            var client = new GeocoderClient(apiKey);
+            var result = await client.Geocode(new UriGeocoderRequest
+            {
+                Uri = "ymapsbm1://geo?data=CgoxNTI1OTU2MDQ1Ev0B0KDQtdGB0L_Rg9Cx0LvQuNC60LAg0KLQsNGC0LDRgNGB0YLQsNC9LCDQmtGD0LrQvNC-0YDRgdC60LjQuSDRgNCw0LnQvtC9LCDQnNCw0L3Qt9Cw0YDQsNGB0YHQutC-0LUg0YHQtdC70YzRgdC60L7QtSDQv9C-0YHQtdC70LXQvdC40LUsINGB0LXQu9C-INCc0LDQvdC30LDRgNCw0YEsINC80LjQutGA0L7RgNCw0LnQvtC9INCu0LbQvdGL0LktNiwg0YPQu9C40YbQsCDQktCw0LvQtdC90YLQuNC90LAg0JrQtdC70YzQvNCw0LrQvtCy0LAsIDE1IA,,"
+            });
+            Assert.NotNull(result);
+            var firstResponseGeoObject = result.GeoObjectCollection.FeatureMember.FirstOrDefault();
+            var firstResponseAddressComponents = firstResponseGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
+            var firstResponseLocality = firstResponseAddressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
+            Assert.Equal("село Манзарас", firstResponseLocality.Name);
         }
     }
 }

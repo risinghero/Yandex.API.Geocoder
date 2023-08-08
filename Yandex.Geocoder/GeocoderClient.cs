@@ -1,7 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Net;
+using System.Net.Http;
+using System.Runtime;
+using System.Threading;
 using System.Threading.Tasks;
-using RestSharp;
+using System.Web;
+using System.Xml.Serialization;
 using Yandex.Geocoder.Enums;
 using Yandex.Geocoder.Models;
 
@@ -11,91 +19,110 @@ namespace Yandex.Geocoder
     {
         public const string DefaultGeocoderBaseUrl = "https://geocode-maps.yandex.ru/1.x/";
 
+        private static HttpClient DefaultHttpClient = new HttpClient();
+        private readonly HttpClient httpClient;
+
         public GeocoderClient(string key)
         {
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
             Key = key;
-            Client = new RestClient(DefaultGeocoderBaseUrl);
+            httpClient = DefaultHttpClient;
+        }
+
+        public GeocoderClient(HttpClient httpClient, string key)
+        {
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
+
+            this.httpClient = httpClient;
+            Key = key;
         }
 
         public string Key { get; }
 
-        public IWebProxy Proxy
+        public Task<GeocoderResponseType> Geocode(UriGeocoderRequest uriGeocoderRequest)
         {
-            get => Client.Proxy;
-
-            set => Client.Proxy = value;
+            var parameters = new NameValueCollection
+            {
+                { "uri", uriGeocoderRequest.Uri }
+            };
+            return ExecuteQuery(parameters, uriGeocoderRequest);
         }
 
-        protected RestClient Client { get; }
 
         public Task<GeocoderResponseType> Geocode(GeocoderRequest geocoderRequest)
         {
-            var restRequest = new RestRequest(Method.GET);
-            restRequest.AddQueryParameter("geocode", geocoderRequest.Request);
+            var parameters = new NameValueCollection
+            {
+                { "geocode", geocoderRequest.Request }
+            };
 
             if (!geocoderRequest.BordersArea.IsEmpty() || !geocoderRequest.SearchArea.IsEmpty())
             {
-                restRequest.AddQueryParameter("rspn", Convert.ToInt32(geocoderRequest.IsRestrictArea).ToString());
+                parameters.Add("rspn", Convert.ToInt32(geocoderRequest.IsRestrictArea).ToString());
 
                 if (!geocoderRequest.BordersArea.IsEmpty())
                 {
                     var lowerLeftCorner = new Coordinate(geocoderRequest.BordersArea.LowerLatitude, geocoderRequest.BordersArea.LowerLongitude);
                     var upperRightCorner = new Coordinate(geocoderRequest.BordersArea.UpperLatitude, geocoderRequest.BordersArea.UpperLongitude);
 
-                    restRequest.AddQueryParameter("bbox", $"{lowerLeftCorner.ToString()}~{upperRightCorner.ToString()}");
+                    parameters.Add("bbox", $"{lowerLeftCorner}~{upperRightCorner}");
                 }
                 else
                 {
                     var coordinate = new Coordinate(geocoderRequest.SearchArea.Latitude, geocoderRequest.SearchArea.Longitude);
                     var span = new Coordinate(geocoderRequest.SearchArea.LatitudeSpan, geocoderRequest.SearchArea.LongitudeSpan);
 
-                    restRequest.AddQueryParameter("ll", coordinate.ToString());
-                    restRequest.AddQueryParameter("spn", span.ToString());
+                    parameters.Add("ll", coordinate.ToString());
+                    parameters.Add("spn", span.ToString());
                 }
             }
 
-            return ExecuteQuery(restRequest, geocoderRequest);
+            return ExecuteQuery(parameters, geocoderRequest);
         }
 
         public Task<GeocoderResponseType> ReverseGeocode(ReverseGeocoderRequest reverseGeocoderRequest)
         {
-            var restRequest = new RestRequest(Method.GET);
+            var restRequest = new NameValueCollection();
             if (!reverseGeocoderRequest.Kind.Equals(AddressComponentKind.None))
             {
-                restRequest.AddQueryParameter("kind", reverseGeocoderRequest.Kind.ToString().ToLower());
+                restRequest.Add("kind", reverseGeocoderRequest.Kind.ToString().ToLower());
             }
 
             var coordinate = new Coordinate(reverseGeocoderRequest.Latitude, reverseGeocoderRequest.Longitude);
-            restRequest.AddQueryParameter("geocode", coordinate.ToString());
+            restRequest.Add("geocode", coordinate.ToString());
 
             return ExecuteQuery(restRequest, reverseGeocoderRequest);
         }
 
-        protected async Task<GeocoderResponseType> ExecuteQuery(RestRequest restRequest, BaseGeocoderRequest baseGeocoderRequest)
+        private static JsonSerializerSettings Settings = new JsonSerializerSettings
         {
-            restRequest.AddQueryParameter("format", "json");
-            restRequest.AddQueryParameter("lang", baseGeocoderRequest.Language.ToString());
+
+        };
+
+        protected async Task<GeocoderResponseType> ExecuteQuery(NameValueCollection parameters, BaseGeocoderRequest baseGeocoderRequest)
+        {
+            parameters.Add("format", "json");
+            parameters.Add("lang", baseGeocoderRequest.Language.ToString());
 
             if (baseGeocoderRequest.Skip != 0)
-            {
-                restRequest.AddQueryParameter("skip ", baseGeocoderRequest.Skip.ToString());
-            }
+                parameters.Add("skip ", baseGeocoderRequest.Skip.ToString());
 
             if (!string.IsNullOrEmpty(Key))
+                parameters.Add("apikey", Key);
+            parameters.Add("results", baseGeocoderRequest.MaxCount.ToString());
+            var isFirst = true;
+            var resultUrl = "https://geocode-maps.yandex.ru/1.x?";
+            foreach (var key in parameters.AllKeys)
             {
-                restRequest.AddQueryParameter("apikey", Key);
+                if (!isFirst)
+                    resultUrl += "&";
+                resultUrl += key + "=" + HttpUtility.UrlEncode(parameters[key]);
+                isFirst = false;
             }
-
-            restRequest.AddQueryParameter("results", baseGeocoderRequest.MaxCount.ToString());
-
-            var response = await Client.ExecuteTaskAsync<GeocoderResponse>(restRequest);
-
-            if (response.ErrorException != null)
-            {
-                throw response.ErrorException;
-            }
-
-            return response.Data.Response;
+            var response = await httpClient.GetAsync(resultUrl);
+            response.EnsureSuccessStatusCode();
+            var str = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<GeocoderResponse>(str, Settings)?.Response;
         }
     }
 }
