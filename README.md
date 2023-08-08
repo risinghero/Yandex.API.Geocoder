@@ -1,14 +1,15 @@
 # Yandex.Geocoder
 
-Geocoding is easy.
+
+This is forked version without RestSharp dependency and with support for object data request (from GeoSuggest uri).
 
 For forward geocoding you should create GeocodeRequest and execute it.
 
     var request = new GeocoderRequest { Request = "Ярославль серова 13" };
     var client = new GeocoderClient();
-
+    
     var response = await client.Geocode(request);
-
+    
     var firstGeoObject = response.GeoObjectCollection.FeatureMember.FirstOrDefault();
     var coordinate = firstGeoObject.GeoObject.Point.Pos;
     var addressComponents = firstGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
@@ -18,7 +19,7 @@ For forward geocoding you should create GeocodeRequest and execute it.
     var city = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
     var street = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Street));
     var house = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.House));
-
+    
     Assert.Equal("Россия", country.Name);
     Assert.Equal("Ярославская область", province.Name);
     Assert.Equal("городской округ Ярославль", area.Name);
@@ -32,9 +33,9 @@ For reverse geocoding you should create ReverseGeocodreRequest.
 
     var request = new ReverseGeocoderRequest { Latitude = 58.046733, Longitude = 38.841715 };
     var client = new GeocoderClient();
-
+    
     var response = await client.ReverseGeocode(request);
-
+    
     var firstGeoObject = response.GeoObjectCollection.FeatureMember.FirstOrDefault();
     var addressComponents = firstGeoObject.GeoObject.MetaDataProperty.GeocoderMetaData.Address.Components;
     var country = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Country));
@@ -43,7 +44,7 @@ For reverse geocoding you should create ReverseGeocodreRequest.
     var city = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Locality));
     var street = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.Street));
     var house = addressComponents.FirstOrDefault(c => c.Kind.Equals(AddressComponentKind.House));
-
+    
     Assert.Equal("Россия", country.Name);
     Assert.Equal("Ярославская область", province.Name);
     Assert.Equal("городской округ Рыбинск", area.Name);
