@@ -12,9 +12,13 @@
     <Version>1.0.0</Version>
     <RootNamespace>Yandex.API.Geocoder</RootNamespace>
     <AssemblyName>Yandex.API.Geocoder</AssemblyName>
-      <LangVersion>10</LangVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
