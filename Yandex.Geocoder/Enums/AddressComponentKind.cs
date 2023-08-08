@@ -55,7 +55,12 @@
         /// <summary>
         /// Ж.д. станция
         /// </summary>
-        Railway,
+        Railway_Station,
+
+        /// <summary>
+        /// станции, не относящиеся к железной дороге. Например, канатные станции.
+        /// </summary>
+        Station,
 
         /// <summary>
         /// Линия метро / шоссе / ж.д. линия
@@ -71,6 +76,11 @@
         /// Аэропорт
         /// </summary>
         Airport,
+
+        /// <summary>
+        /// подъезд / вход
+        /// </summary>
+        Entrance,
 
         /// <summary>
         /// Прочее

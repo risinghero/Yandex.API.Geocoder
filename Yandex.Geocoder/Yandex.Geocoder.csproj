@@ -7,9 +7,9 @@
     <Title>Yandex.API.Geocoder</Title>
     <Description>Yandex geocoder API client</Description>
     <PackageId>Yandex.API.Geocoder</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.0.1</PackageVersion>
     <Summary>Yandex geocoder API client</Summary>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <RootNamespace>Yandex.API.Geocoder</RootNamespace>
     <AssemblyName>Yandex.API.Geocoder</AssemblyName>
     <PackageReadmeFile>README.md</PackageReadmeFile>
